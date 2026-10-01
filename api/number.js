@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -27,12 +30,39 @@ export default async function handler(req, res) {
     });
   }
 
-  if (!key.startsWith('ABHI-')) {
+  let keysData;
+  try {
+    const keysPath = path.join(process.cwd(), 'keys.json');
+    const raw = fs.readFileSync(keysPath, 'utf-8');
+    keysData = JSON.parse(raw);
+  } catch (err) {
+    return res.status(500).json({
+      status: "error",
+      message: "key database error",
+      developer: "abhi09hub"
+    });
+  }
+
+  const entry = keysData.keys.find(k => k.key === key);
+
+  if (!entry) {
     return res.status(401).json({
       status: "error",
       message: "invalid key",
       developer: "@abhi09hub"
     });
+  }
+
+  if (entry.expires !== "never") {
+    const today = new Date().toISOString().slice(0, 10);
+    if (today > entry.expires) {
+      return res.status(401).json({
+        status: "error",
+        message: "key expired",
+        expired_on: entry.expires,
+        developer: "@abhi09hub"
+      });
+    }
   }
 
   try {
