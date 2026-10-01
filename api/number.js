@@ -54,8 +54,14 @@ export default async function handler(req, res) {
   }
 
   if (entry.expires !== "never") {
-    const today = new Date().toISOString().slice(0, 10);
-    if (today > entry.expires) {
+    let expiry;
+    if (entry.expires.includes('T')) {
+      expiry = new Date(entry.expires + ':00+05:30');
+    } else {
+      expiry = new Date(entry.expires + 'T23:59:59+05:30');
+    }
+    const now = new Date();
+    if (now > expiry) {
       return res.status(401).json({
         status: "error",
         message: "key expired",
