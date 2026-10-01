@@ -1,0 +1,10 @@
+{
+  "keys": [
+    {
+      "key": "ABHI-TEST-0001",
+      "name": "Test Key",
+      "plan": "test",
+      "expires": "2026-12-31"
+    }
+  ]
+}
